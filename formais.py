@@ -30,17 +30,17 @@ class Lexer:
         self.current_char = self.text[self.pos] if self.text else None
 
     def advance(self):
-        """Move the position pointer and update the current character."""
+        """Mova o ponteiro de posição e atualize o caractere atual."""
         self.pos += 1
         self.current_char = self.text[self.pos] if self.pos < len(self.text) else None
 
     def skip_whitespace(self):
-        """Skip over any whitespace characters."""
+        """Pule os espaços sem nada"""
         while self.current_char and self.current_char.isspace():
             self.advance()
 
     def string(self):
-        """Handle string tokens."""
+        """Tratar os tokens da string"""
         result = ''
         self.advance()  
         while self.current_char and self.current_char != '"':
@@ -50,7 +50,7 @@ class Lexer:
         return Token(TokenType.STRING, result, self.pos)
 
     def number(self):
-        """Handle numeric tokens including integers and decimals."""
+        """Tratar os tokens dos números, incluindo os decimais"""
         result = ''
         while self.current_char and (self.current_char.isdigit() or self.current_char == '.'):
             result += self.current_char
@@ -58,7 +58,7 @@ class Lexer:
         return Token(TokenType.NUMBER, float(result), self.pos)
 
     def identifier(self):
-        """Handle boolean and null identifiers."""
+        """Tratar nulos e boolenaos"""
         result = ''
         while self.current_char and self.current_char.isalpha():
             result += self.current_char
@@ -70,7 +70,7 @@ class Lexer:
         raise ValueError(f'Invalid identifier: {result}')
 
     def get_next_token(self):
-        """Retrieve the next token from the input text."""
+        """Pegar o próximo caractere"""
         while self.current_char:
 
             if self.current_char.isspace():
@@ -102,7 +102,7 @@ class Lexer:
         return Token(TokenType.EOF, None, self.pos)
 
     def peek(self):
-        """Look at the next character without advancing the position."""
+        """OLhar pro próximo caractere sem pular de posição"""
         return self.text[self.pos + 1] if self.pos + 1 < len(self.text) else None
 
     def generate_tokens(self):
@@ -116,50 +116,50 @@ class Lexer:
         return tokens
     
 def run_tests():
-    """Run a series of test cases including valid and invalid inputs."""
+    """Test cases para testarmos o código feito"""
 
     test_cases = [
         ('{"name": "Felipe", "age": 20, "isMan": true, "languages": ["Python", "JavaScript"], "nullValue": null}',
-         "Valid JSON with strings, numbers, booleans, arrays, and null values."),
+         "Teste todo funcional e válido"),
 
         ('{"emptyObject": {}, "emptyArray": []}', 
-         "Valid JSON with empty object and empty array."),
+         "Válido vazio"),
 
         ('{"negativeNumber": -42, "decimal": 3.14}', 
-         "Valid JSON with negative number and decimal."),
+         "Json válido com decimal e negativo"),
 
         ('{"name": Felipe, "age": 20, "isMan": true}', 
-         "Missing quotes around the string 'Felipe'."),
+         "'Felipe' sem aspas"),
 
         ('{"age": @20}', 
-         "Invalid character '@' before the number."),
+         "@ que não deveria estar antes de um número"),
 
         ('{"isValid": maybe}', 
-         "Unrecognized identifier 'maybe' which is not true, false, or null."),
+         "Identificador desconhecido"),
 
         ('{"languages": [Python, JavaScript]}', 
-         "Missing quotes around strings inside the array."),
+         "String sem aspas."),
 
         ('{"unterminatedString": "hello}', 
-         "Unterminated string, missing closing quote."),
+         "String inacabada"),
 
         ('{"colonError" "missingColonValue"}', 
-         "Missing colon between key and value."),
+         "Sem : entre a chave e valor"),
 
         ('{name: "Felipe"}', 
-         "Key 'name' without quotes."),
+         "Nome sem a chave com aspas."),
 
         ('{"numberWithLetters": 123abc}', 
-         "Number followed by unexpected letters."),
+         "Número seguido por caracteres"),
 
         ('{}', 
-         "Valid empty JSON object."),
+         "JSON válido e vazio"),
 
         ('[]', 
-         "Valid empty JSON array."),
+         "JSON vazio válido"),
 
         ('{"key": "value", "number": 0.0}', 
-         "Valid JSON with a float number zero."),
+         "Vpalido com float 0"),
     ]
 
     for input_text, description in test_cases:
