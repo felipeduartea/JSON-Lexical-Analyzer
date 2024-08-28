@@ -40,22 +40,48 @@ class Lexer:
             self.advance()
 
     def string(self):
-        """Tratar os tokens da string"""
+        """Tratar os tokens da string, incluindo caracteres escapados"""
         result = ''
         self.advance()  
-        while self.current_char and self.current_char != '"':
-            result += self.current_char
+        while self.current_char:
+            if self.current_char == '"':
+                break
+            if self.current_char == '\\':
+                self.advance()
+                if self.current_char in '"\\/bfnrt':
+                    escape_sequences = {
+                        '"': '"', '\\': '\\', '/': '/', 'b': '\b',
+                        'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'
+                    }
+                    result += escape_sequences.get(self.current_char, self.current_char)
+                else:
+                    raise ValueError(f'Invalid escape character: \\{self.current_char}')
+            else:
+                result += self.current_char
             self.advance()
-        self.advance() 
+        self.advance()  # Skip the closing quote
         return Token(TokenType.STRING, result, self.pos)
 
     def number(self):
-        """Tratar os tokens dos números, incluindo os decimais"""
+        """Tratar os tokens dos números, incluindo os decimais e notação científica"""
         result = ''
-        while self.current_char and (self.current_char.isdigit() or self.current_char == '.'):
+        if self.current_char == '-':
             result += self.current_char
             self.advance()
-        return Token(TokenType.NUMBER, float(result), self.pos)
+        while self.current_char and (self.current_char.isdigit() or self.current_char in '.eE'):
+            if self.current_char in 'eE':
+                result += self.current_char
+                self.advance()
+                if self.current_char in '+-':
+                    result += self.current_char
+                    self.advance()
+            else:
+                result += self.current_char
+                self.advance()
+        try:
+            return Token(TokenType.NUMBER, float(result), self.pos)
+        except ValueError:
+            raise ValueError(f'Invalid number format: {result}')
 
     def identifier(self):
         """Tratar nulos e boolenaos"""
@@ -80,7 +106,7 @@ class Lexer:
             if self.current_char == '"':
                 return self.string()
 
-            if self.current_char.isdigit() or (self.current_char == '-' and self.peek() and self.peek().isdigit()):
+            if self.current_char.isdigit() or (self.current_char == '-' and self.peek() and (self.peek().isdigit() or self.peek() == '.')):
                 return self.number()
 
             if self.current_char.isalpha():
@@ -125,8 +151,11 @@ def run_tests():
         ('{"emptyObject": {}, "emptyArray": []}', 
          "Válido vazio"),
 
-        ('{"negativeNumber": -42, "decimal": 3.14}', 
-         "Json válido com decimal e negativo"),
+        ('{"negativeNumber": -42, "decimal": 3.14, "scientific": 1.23e4}', 
+         "Json válido com decimal, negativo e notação científica"),
+
+        ('{"name": "Felipe\\nSilva", "quote": "He said, \\"Hello!\\""}',
+         "Strings com caracteres escapados"),
 
         ('{"name": Felipe, "age": 20, "isMan": true}', 
          "'Felipe' sem aspas"),
@@ -159,7 +188,7 @@ def run_tests():
          "JSON vazio válido"),
 
         ('{"key": "value", "number": 0.0}', 
-         "Vpalido com float 0"),
+         "Válido com float 0"),
     ]
 
     for input_text, description in test_cases:
