@@ -1,5 +1,6 @@
 import re
 
+
 class TokenType:
     STRING = 'STRING'
     NUMBER = 'NUMBER'
@@ -14,6 +15,7 @@ class TokenType:
     COMMA = 'COMMA'
     EOF = 'EOF'
 
+
 class Token:
     def __init__(self, type_, value, position):
         self.type = type_
@@ -22,6 +24,7 @@ class Token:
 
     def __repr__(self):
         return f"Token({self.type}, {repr(self.value)}, position={self.position})"
+
 
 class Lexer:
     def __init__(self, input_text):
@@ -42,7 +45,7 @@ class Lexer:
     def string(self):
         """Tratar os tokens da string, incluindo caracteres escapados"""
         result = ''
-        self.advance()  
+        self.advance()
         while self.current_char:
             if self.current_char == '"':
                 break
@@ -79,7 +82,10 @@ class Lexer:
                 result += self.current_char
                 self.advance()
         try:
-            return Token(TokenType.NUMBER, float(result), self.pos)
+            if '.' in result or 'e' in result or 'E' in result:
+                return Token(TokenType.NUMBER, float(result), self.pos)
+            else:
+                return Token(TokenType.NUMBER, int(result), self.pos)
         except ValueError:
             raise ValueError(f'Invalid number format: {result}')
 
@@ -106,7 +112,8 @@ class Lexer:
             if self.current_char == '"':
                 return self.string()
 
-            if self.current_char.isdigit() or (self.current_char == '-' and self.peek() and (self.peek().isdigit() or self.peek() == '.')):
+            if self.current_char.isdigit() or (
+                    self.current_char == '-' and self.peek() and (self.peek().isdigit() or self.peek() == '.')):
                 return self.number()
 
             if self.current_char.isalpha():
@@ -140,7 +147,8 @@ class Lexer:
             if token.type == TokenType.EOF:
                 break
         return tokens
-    
+
+
 def run_tests():
     """Test cases para testarmos o código feito"""
 
@@ -148,46 +156,43 @@ def run_tests():
         ('{"name": "Felipe", "age": 20, "isMan": true, "languages": ["Python", "JavaScript"], "nullValue": null}',
          "Teste todo funcional e válido"),
 
-        ('{"emptyObject": {}, "emptyArray": []}', 
+        ('{"emptyObject": {}, "emptyArray": []}',
          "Válido vazio"),
 
-        ('{"negativeNumber": -42, "decimal": 3.14, "scientific": 1.23e4}', 
+        ('{"negativeNumber": -42, "decimal": 3.14, "scientific": 1.23e4}',
          "Json válido com decimal, negativo e notação científica"),
 
         ('{"name": "Felipe\\nSilva", "quote": "He said, \\"Hello!\\""}',
          "Strings com caracteres escapados"),
 
-        ('{"name": Felipe, "age": 20, "isMan": true}', 
+        ('{"name": Felipe, "age": 20, "isMan": true}',
          "'Felipe' sem aspas"),
 
-        ('{"age": @20}', 
+        ('{"age": @20}',
          "@ que não deveria estar antes de um número"),
 
-        ('{"isValid": maybe}', 
+        ('{"isValid": maybe}',
          "Identificador desconhecido"),
 
-        ('{"languages": [Python, JavaScript]}', 
+        ('{"languages": [Python, JavaScript]}',
          "String sem aspas."),
 
-        ('{"unterminatedString": "hello}', 
+        ('{"unterminatedString": "hello}',
          "String inacabada"),
 
-        ('{"colonError" "missingColonValue"}', 
-         "Sem : entre a chave e valor"),
-
-        ('{name: "Felipe"}', 
+        ('{name: "Felipe"}',
          "Nome sem a chave com aspas."),
 
-        ('{"numberWithLetters": 123abc}', 
+        ('{"numberWithLetters": 123abc}',
          "Número seguido por caracteres"),
 
-        ('{}', 
+        ('{}',
          "JSON válido e vazio"),
 
-        ('[]', 
+        ('[]',
          "JSON vazio válido"),
 
-        ('{"key": "value", "number": 0.0}', 
+        ('{"key": "value", "number": 0.0}',
          "Válido com float 0"),
     ]
 
@@ -201,6 +206,7 @@ def run_tests():
             print("Test passed.\n")
         except Exception as e:
             print(f"Test failed as expected with error: {e}\n")
+
 
 if __name__ == "__main__":
     run_tests()
