@@ -9,7 +9,9 @@ def main():
     lexer = Lexer(json_input)     # Criando o lexer, com objetivo de gerar tokens
     tokens = lexer.generate_tokens() # Gera os tokens a partir do texto de entrada
 
-    print("Tokens gerados:")
+    print("Input:", json_input)
+
+    print("\nTokens gerados:")
     print("\033[93m") # Yellow
     for token in tokens:
         print("Token:", token)
@@ -22,19 +24,16 @@ def main():
         print("JSON interpretado com sucesso:")
         print(parsed_json)
         
-        print('\n')
         print("\033[92m") # Green
         print("Imprimindo o JSON inteiro formatado:")
         pprint.pprint(parsed_json, indent=1, sort_dicts=False)
         print("\033[0m") # Reset color
 
-        print('\n')
         print("\033[91m") # Red
         print("Imprimindo o valor do objeto 'key':")
         print("\033[90m->", parsed_json.get('object').get('key')) # Dark gray
         print("\033[0m") # Reset color
 
-        print('\n')
         print("\033[91m") # Red
         print("Imprimindo o valor do array 'array':")
         print("\033[90m->", parsed_json.get('array')[1]) # Dark gray
